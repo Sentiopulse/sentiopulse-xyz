@@ -1,0 +1,85 @@
+"use client";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+
+type FetchPostProps = {
+  title: string;
+  content: string;
+  source: string;
+  signalTime: string;
+  sentiment: "BULLISH" | "NEUTRAL" | "BEARISH";
+  published: boolean;
+};
+
+export default function FetchPost() {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [info, setInfo] = useState<FetchPostProps[] | null>([]);
+
+  useEffect(() => {
+    const infoFetcher = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/fetchpost");
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.error);
+        }
+        setError(null);
+        setInfo(data);
+      } catch (err) {
+        console.error(err);
+        setError("An error occurred while fetching posts.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    infoFetcher();
+  }, []);
+
+  if (error) {
+    return <div className="text-destructive">No Posts Found</div>;
+  }
+  if (loading) {
+    return <div>Loading Posts...</div>;
+  }
+
+  return (
+    <div className="container mx-auto py-8 px-4 bg-white">
+      <h1 className="text-4xl font-extrabold text-center mb-8 text-black">
+        Posts
+      </h1>
+      <div className="flex flex-row flex-wrap justify-center gap-4">
+        {info?.map((post: FetchPostProps, index: number) => (
+          <Card
+            key={index}
+            className="bg-black text-white border border-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 w-48"
+          >
+            <CardHeader className="p-2 border-b border-gray-700">
+              <CardTitle className="text-sm font-bold">{post.title}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-2">
+              <p className="text-xs mb-1">
+                <strong>Content:</strong> {post.content}
+              </p>
+              <p className="text-xs mb-1">
+                <strong>Sentiment:</strong> {post.sentiment}
+              </p>
+              <p className="text-xs mb-1">
+                <strong>Source:</strong> {post.source}
+              </p>
+              <p className="text-xs mb-1">
+                <strong>Signal Time:</strong>{" "}
+                {new Date(post.signalTime).toLocaleString()}
+              </p>
+              <p className="text-xs">
+                <strong>Published:</strong> {post.published ? "Yes" : "No"}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
