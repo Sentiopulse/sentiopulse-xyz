@@ -26,9 +26,31 @@ model User {
   emailVerified    Boolean  @default(false)
   subscriptionType String   @default("free")
   lastLoginAt      DateTime?
+  
+  posts            Post[]
 }
 
 enum Role {
   USER
   ADMIN
+}
+
+enum Sentiment {
+  BULLISH
+  NEUTRAL
+  BEARISH
+}
+
+model Post {
+  id           String    @id @default(uuid())
+  title        String
+  content      String?
+  sentiment    Sentiment
+  source       String
+  signalTime   DateTime
+  published    Boolean   @default(false)
+  authorId     String?
+  author       User?     @relation(fields: [authorId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
