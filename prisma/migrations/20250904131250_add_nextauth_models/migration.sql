@@ -11,8 +11,7 @@ ALTER TABLE "public"."Post" DROP CONSTRAINT "Post_authorId_fkey";
 -- AlterTable
 ALTER TABLE "public"."User" ADD COLUMN     "image" TEXT,
 ALTER COLUMN "password" DROP NOT NULL,
-DROP COLUMN "emailVerified",
-ADD COLUMN     "emailVerified" TIMESTAMP(3);
+ALTER COLUMN "emailVerified" TYPE TIMESTAMPTZ(3) USING ("emailVerified" AT TIME ZONE 'UTC');
 
 -- DropTable
 DROP TABLE "public"."Post";
