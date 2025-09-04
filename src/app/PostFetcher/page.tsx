@@ -1,5 +1,6 @@
 "use client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { Post } from "@/generated/prisma";
 
@@ -7,6 +8,15 @@ export default function FetchPost() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [info, setInfo] = useState<Post[]>([]);
+  const [search, setSearch] = useState("");
+
+  const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+  };
+  // Filter posts based on the search query
+  const filteredPosts = info.filter((post) =>
+    post.content?.toLowerCase().includes(search.toLowerCase())
+  );
 
   useEffect(() => {
     const infoFetcher = async () => {
@@ -47,8 +57,15 @@ export default function FetchPost() {
       <h1 className="text-4xl font-extrabold text-center mb-8 text-black">
         Posts
       </h1>
+      <div className="mb-4 flex justify-center">
+        <Input
+          onChange={onChangeHandler}
+          placeholder="Search posts..."
+          className="w-full max-w-md"
+        />
+      </div>
       <div className="flex flex-row flex-wrap justify-center gap-4">
-        {info.map((post: Post, index: number) => (
+        {filteredPosts.map((post: Post, index: number) => (
           <Card
             key={index}
             className="bg-black text-white border border-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 w-48"
