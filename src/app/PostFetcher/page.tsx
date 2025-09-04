@@ -2,20 +2,30 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
-import { Post } from "@/generated/prisma";
+
+type PostDTO = {
+  id: string;
+  title: string;
+  content: string | null;
+  sentiment: string;
+  source: string;
+  signalTime: string;
+  published: boolean;
+};
 
 export default function FetchPost() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [info, setInfo] = useState<Post[]>([]);
+  const [info, setInfo] = useState<PostDTO[]>([]);
   const [search, setSearch] = useState("");
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
   };
   // Filter posts based on the search query
+  const q = search.trim().toLowerCase();
   const filteredPosts = info.filter((post) =>
-    post.content?.toLowerCase().includes(search.toLowerCase())
+    (post.content ?? "").toLowerCase().includes(q)
   );
 
   useEffect(() => {
@@ -65,7 +75,7 @@ export default function FetchPost() {
         />
       </div>
       <div className="flex flex-row flex-wrap justify-center gap-4">
-        {filteredPosts.map((post: Post, index: number) => (
+        {filteredPosts.map((post: PostDTO, index: number) => (
           <Card
             key={index}
             className="bg-black text-white border border-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 w-48"
