@@ -2,22 +2,42 @@
   Warnings:
 
   - The `emailVerified` column on the `User` table would be dropped and recreated. This will lead to data loss if there is data in the column.
-  - You are about to drop the `Post` table. If the table is not empty, all the data it contains will be lost.
 
 */
--- DropForeignKey
-ALTER TABLE "public"."Post" DROP CONSTRAINT "Post_authorId_fkey";
 
 -- AlterTable
 ALTER TABLE "public"."User" ADD COLUMN     "image" TEXT,
-ALTER COLUMN "password" DROP NOT NULL,
-ALTER COLUMN "emailVerified" TYPE TIMESTAMPTZ(3) USING ("emailVerified" AT TIME ZONE 'UTC');
+ALTER COLUMN "password" DROP NOT NULL;
 
--- DropTable
-DROP TABLE "public"."Post";
-
--- DropEnum
-DROP TYPE "public"."Sentiment";
+-- Convert emailVerified from boolean to timestamp with conditional logic
+DO $$ BEGIN
+    -- If emailVerified is currently boolean, convert it
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'User' AND column_name = 'emailVerified'
+          AND data_type = 'boolean'
+    ) THEN
+        -- First drop the default constraint
+        ALTER TABLE "public"."User" ALTER COLUMN "emailVerified" DROP DEFAULT;
+        -- Then drop NOT NULL if it exists
+        ALTER TABLE "public"."User" ALTER COLUMN "emailVerified" DROP NOT NULL;
+        -- Now convert the type: boolean true -> current timestamp, false -> NULL
+        ALTER TABLE "public"."User" 
+        ALTER COLUMN "emailVerified" TYPE TIMESTAMP(3) 
+        USING CASE 
+            WHEN "emailVerified" = true THEN CURRENT_TIMESTAMP 
+            ELSE NULL 
+        END;
+    ELSIF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'User' AND column_name = 'emailVerified'
+          AND data_type = 'timestamp without time zone'
+    ) THEN
+        -- Already timestamp, just ensure it's the right precision
+        ALTER TABLE "public"."User" 
+        ALTER COLUMN "emailVerified" TYPE TIMESTAMP(3);
+    END IF;
+END $$;
 
 -- CreateTable
 CREATE TABLE "public"."Account" (
