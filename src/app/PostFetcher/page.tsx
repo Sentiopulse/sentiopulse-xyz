@@ -1,36 +1,30 @@
 "use client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-
-type FetchPostProps = {
-  title: string;
-  content: string;
-  source: string;
-  signalTime: string;
-  sentiment: "BULLISH" | "NEUTRAL" | "BEARISH";
-  published: boolean;
-};
+import { Post } from "@/generated/prisma";
 
 export default function FetchPost() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [info, setInfo] = useState<FetchPostProps[] | null>([]);
+  const [info, setInfo] = useState<Post[]>([]);
 
   useEffect(() => {
     const infoFetcher = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/fetchpost");
+        const res = await fetch("/api/posts");
         const data = await res.json();
 
         if (!res.ok) {
           setError(data.error);
+          setInfo([]);
+        } else {
+          setError(null);
+          setInfo(data.data); // Use the array from the API response
         }
-        setError(null);
-        setInfo(data);
-      } catch (err) {
-        console.error(err);
+      } catch {
         setError("An error occurred while fetching posts.");
+        setInfo([]);
       } finally {
         setLoading(false);
       }
@@ -39,10 +33,13 @@ export default function FetchPost() {
   }, []);
 
   if (error) {
-    return <div className="text-destructive">No Posts Found</div>;
+    return <div className="text-destructive">{error}</div>;
   }
   if (loading) {
     return <div>Loading Posts...</div>;
+  }
+  if (!info.length) {
+    return <div className="text-destructive">No Posts Found</div>;
   }
 
   return (
@@ -51,7 +48,7 @@ export default function FetchPost() {
         Posts
       </h1>
       <div className="flex flex-row flex-wrap justify-center gap-4">
-        {info?.map((post: FetchPostProps, index: number) => (
+        {info.map((post: Post, index: number) => (
           <Card
             key={index}
             className="bg-black text-white border border-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 w-48"
@@ -73,7 +70,7 @@ export default function FetchPost() {
                 <strong>Signal Time:</strong>{" "}
                 {new Date(post.signalTime).toLocaleString()}
               </p>
-              <p className="text-xs">
+              <p className="text-xs mb-1">
                 <strong>Published:</strong> {post.published ? "Yes" : "No"}
               </p>
             </CardContent>
