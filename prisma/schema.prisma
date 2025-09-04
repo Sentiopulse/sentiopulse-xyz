@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -27,7 +26,7 @@ model User {
   subscriptionType String   @default("free")
   lastLoginAt      DateTime?
   
-  posts            Post[]
+  // posts            Post[]
 }
 
 enum Role {
@@ -40,17 +39,21 @@ enum Sentiment {
   NEUTRAL
   BEARISH
 }
+enum Source {
+  REDDIT 
+  TWITTER
+  YOUTUBE
+  TELEGRAM
+  FARCASTER
+}
 
 model Post {
   id           String    @id @default(uuid())
   title        String
   content      String?
   sentiment    Sentiment
-  source       String
+  source       Source
   signalTime   DateTime
-  published    Boolean   @default(false)
-  authorId     String?
-  author       User?     @relation(fields: [authorId], references: [id])
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
