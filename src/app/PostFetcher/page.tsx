@@ -70,9 +70,6 @@ export default function FetchPost() {
                 <strong>Signal Time:</strong>{" "}
                 {new Date(post.signalTime).toLocaleString()}
               </p>
-              <p className="text-xs mb-1">
-                <strong>Published:</strong> {post.published ? "Yes" : "No"}
-              </p>
             </CardContent>
           </Card>
         ))}

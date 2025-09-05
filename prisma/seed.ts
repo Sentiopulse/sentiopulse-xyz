@@ -1,4 +1,4 @@
-import { PrismaClient } from "../src/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 
 const prisma = new PrismaClient();
@@ -20,9 +20,14 @@ async function main() {
       "Experts predict significant trends in the crypto market for the upcoming year.",
     ]), // Generate crypto-related content
     sentiment: faker.helpers.arrayElement(["BULLISH", "NEUTRAL", "BEARISH"]),
-    source: faker.internet.domainName(),
+    source: faker.helpers.arrayElement([
+      "REDDIT",
+      "TWITTER",
+      "YOUTUBE",
+      "TELEGRAM",
+      "FARCASTER",
+    ]),
     signalTime: faker.date.recent(),
-    published: faker.datatype.boolean(),
   }));
 
   await prisma.post.createMany({

@@ -9,7 +9,6 @@ export async function GET() {
         content: true,
         source: true,
         signalTime: true,
-        published: true,
         sentiment: true,
       },
     });
@@ -18,7 +17,7 @@ export async function GET() {
     }
     return NextResponse.json({ data: posts }, { status: 200 });
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching posts:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
