@@ -5,7 +5,7 @@ import { Post } from "@/generated/prisma";
 
 export default function FetchPost() {
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [info, setInfo] = useState<Post[]>([]);
 
   useEffect(() => {
