@@ -49,7 +49,7 @@ export async function GET(req: Request) {
       }));
     }
     if (posts.length === 0) {
-      return NextResponse.json({ error: "No Posts Found" }, { status: 404 });
+      return NextResponse.json({ error: "No Posts Found" }, { status: 200 });
     }
     return NextResponse.json({ data: posts }, { status: 200 });
   } catch (err) {
