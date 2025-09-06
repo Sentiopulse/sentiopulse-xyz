@@ -20,7 +20,8 @@ export async function GET(req: Request) {
       posts = await prisma.$queryRaw<PostDTO[]>`
         SELECT "id", "title", "content", "sentiment", "source", "signalTime" AS "signalTime"
         FROM "Post"
-        WHERE to_tsvector('english', "content" || ' ' || "title") @@ plainto_tsquery('english', ${search})
+        WHERE to_tsvector('english', COALESCE("content",'') || ' ' || COALESCE("title",''))
+          @@ websearch_to_tsquery('english', ${search})
       `;
       console.log("Search results:", posts); // Debug search results
       // Convert signalTime to ISO string
