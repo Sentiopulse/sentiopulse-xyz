@@ -1,11 +1,10 @@
 "use client";
 import PostCard from "../../components/PostComponents/PostCard";
 import SentimentBar from "../../components/PostComponents/SentimentBar";
-import { Input } from "@/components/ui/input";
+import PostFilters from "../../components/PostComponents/PostFilters";
 import { useEffect, useState } from "react";
 
 import {
-  PostSortSelect,
   SortField,
   SortOrder,
 } from "../../components/PostComponents/PostSortSelect";
@@ -27,6 +26,10 @@ export default function FetchPost() {
 
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+
+  // Filter states
+  const [sentimentFilter, setSentimentFilter] = useState<string>("all");
+  const [platformFilter, setPlatformFilter] = useState<string>("all");
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
@@ -60,40 +63,50 @@ export default function FetchPost() {
       }
     };
     infoFetcher();
-  }, [search, sortField, sortOrder]);
+  }, [search, sortField, sortOrder, sentimentFilter, platformFilter]);
 
   return (
     <div className="container mx-auto py-8 px-4 bg-white font-sans">
       <h1 className="text-4xl font-extrabold text-center mb-8 text-black">
         Posts
       </h1>
-      <div className="mb-4 flex justify-center">
-        <Input
-          value={search}
-          onChange={onChangeHandler}
-          placeholder="Search posts..."
-          className="w-full max-w-md"
-        />
-      </div>
 
-      <div className="mb-6 flex justify-center">
-        <PostSortSelect
-          sortField={sortField}
-          sortOrder={sortOrder}
-          onSortFieldChange={setSortField}
-          onSortOrderChange={setSortOrder}
-        />
-      </div>
+      {/* Search and Filters Section */}
+      <PostFilters
+        search={search}
+        onSearchChange={onChangeHandler}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        onSortFieldChange={setSortField}
+        onSortOrderChange={setSortOrder}
+        sentimentFilter={sentimentFilter}
+        onSentimentChange={setSentimentFilter}
+        platformFilter={platformFilter}
+        onPlatformChange={setPlatformFilter}
+      />
 
       {/* Sentiment percentage bar */}
       {!loading &&
         !error &&
         info.length > 0 &&
         (() => {
-          const total = info.length;
-          const bullish = info.filter((p) => p.sentiment === "BULLISH").length;
-          const neutral = info.filter((p) => p.sentiment === "NEUTRAL").length;
-          const bearish = info.filter((p) => p.sentiment === "BEARISH").length;
+          const filteredInfo = info.filter(
+            (post) =>
+              (sentimentFilter === "all" ||
+                post.sentiment === sentimentFilter) &&
+              (platformFilter === "all" || post.source === platformFilter)
+          );
+          const total = filteredInfo.length;
+          if (total === 0) return null;
+          const bullish = filteredInfo.filter(
+            (p) => p.sentiment === "BULLISH"
+          ).length;
+          const neutral = filteredInfo.filter(
+            (p) => p.sentiment === "NEUTRAL"
+          ).length;
+          const bearish = filteredInfo.filter(
+            (p) => p.sentiment === "BEARISH"
+          ).length;
           const bullishPct = Math.round((bullish / total) * 100);
           const neutralPct = Math.round((neutral / total) * 100);
           const bearishPct = Math.round((bearish / total) * 100);
@@ -116,9 +129,16 @@ export default function FetchPost() {
 
       {!loading && !error && info.length > 0 && (
         <div className="flex flex-col gap-4 items-center">
-          {info.map((post: PostDTO, index: number) => (
-            <PostCard key={index} post={post} />
-          ))}
+          {info
+            .filter(
+              (post) =>
+                (sentimentFilter === "all" ||
+                  post.sentiment === sentimentFilter) &&
+                (platformFilter === "all" || post.source === platformFilter)
+            )
+            .map((post: PostDTO, index: number) => (
+              <PostCard key={index} post={post} />
+            ))}
         </div>
       )}
     </div>
