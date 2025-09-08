@@ -4,6 +4,12 @@ import SentimentBar from "../../components/PostComponents/SentimentBar";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 
+import {
+  PostSortSelect,
+  SortField,
+  SortOrder,
+} from "../../components/PostComponents/PostSortSelect";
+
 type PostDTO = {
   id: string;
   title: string;
@@ -19,6 +25,9 @@ export default function FetchPost() {
   const [info, setInfo] = useState<PostDTO[]>([]);
   const [search, setSearch] = useState("");
 
+  const [sortField, setSortField] = useState<SortField>("createdAt");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
   };
@@ -28,9 +37,11 @@ export default function FetchPost() {
       setLoading(true);
       try {
         console.log("Search query:", search); // Debug search value
-        const res = await fetch(
-          `/api/posts${search ? `?search=${encodeURIComponent(search)}` : ""}`
-        );
+        const params = new URLSearchParams();
+        if (search) params.append("search", search);
+        if (sortField) params.append("sort", sortField);
+        if (sortOrder) params.append("order", sortOrder);
+        const res = await fetch(`/api/posts?${params.toString()}`);
         const data = await res.json();
         console.log("API response:", data); // Debug API response
 
@@ -49,7 +60,7 @@ export default function FetchPost() {
       }
     };
     infoFetcher();
-  }, [search]);
+  }, [search, sortField, sortOrder]);
 
   return (
     <div className="container mx-auto py-8 px-4 bg-white font-sans">
@@ -62,6 +73,15 @@ export default function FetchPost() {
           onChange={onChangeHandler}
           placeholder="Search posts..."
           className="w-full max-w-md"
+        />
+      </div>
+
+      <div className="mb-6 flex justify-center">
+        <PostSortSelect
+          sortField={sortField}
+          sortOrder={sortOrder}
+          onSortFieldChange={setSortField}
+          onSortOrderChange={setSortOrder}
         />
       </div>
 
