@@ -19,22 +19,29 @@ const SentimentBar: React.FC<SentimentBarProps> = ({
   useEffect(() => {
     const duration = 700;
     const step = 20;
+    const timers: number[] = [];
+    const clamp = (v: number) => Math.max(0, Math.min(100, v));
     const animate = (target: number, setter: (v: number) => void) => {
       let current = 0;
-      const increment = target / (duration / step);
-      const timer = setInterval(() => {
+      const finalTarget = clamp(target);
+      const increment = finalTarget / (duration / step);
+      const timer = window.setInterval(() => {
         current += increment;
-        if (current >= target) {
-          setter(target);
-          clearInterval(timer);
+        if (current >= finalTarget) {
+          setter(Math.round(finalTarget));
+          window.clearInterval(timer);
         } else {
           setter(Math.round(current));
         }
       }, step);
+      timers.push(timer);
     };
     animate(bullishPct, setBullish);
     animate(neutralPct, setNeutral);
     animate(bearishPct, setBearish);
+    return () => {
+      timers.forEach(window.clearInterval);
+    };
   }, [bullishPct, neutralPct, bearishPct]);
 
   return (
