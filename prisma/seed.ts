@@ -8,85 +8,55 @@ async function main() {
     {
       title: "How to earn crypto in 2025",
       content: "Learn how to earn Bitcoin and Ethereum by staking and trading.",
-      sentiment: "BULLISH",
-      source: "REDDIT",
+      sentiment: "BULLISH" as Sentiment,
+      source: "TWITTER" as Source,
       signalTime: faker.date.recent(),
+      category: ["Earning", "Staking"],
+      subcategory: ["Bitcoin", "Ethereum"],
     },
     {
-      title: "Earning passive income with DeFi",
-      content: "Earning rewards through liquidity pools is becoming popular.",
-      sentiment: "BULLISH",
-      source: "TWITTER",
+      title: "Passive income with DeFi",
+      content: "Liquidity pools and yield farming for passive crypto income.",
+      sentiment: "BULLISH" as Sentiment,
+      source: "TELEGRAM" as Source,
       signalTime: faker.date.recent(),
+      category: ["DeFi", "Passive Income"],
+      subcategory: ["Liquidity Pools", "Yield Farming"],
     },
     {
-      title: "Top strategies for earning crypto",
-      content:
-        "Discover top strategies for earning and growing your crypto portfolio.",
-      sentiment: "NEUTRAL",
-      source: "YOUTUBE",
+      title: "Crypto market trends 2025",
+      content: "Analysis of bullish trends in the crypto market for 2025.",
+      sentiment: "BULLISH" as Sentiment,
+      source: "TWITTER" as Source,
       signalTime: faker.date.recent(),
-    },
-    {
-      title: "Has anyone earned big from altcoins?",
-      content: "Many have earned significant profits from altcoin investments.",
-      sentiment: "BULLISH",
-      source: "TELEGRAM",
-      signalTime: faker.date.recent(),
-    },
-    {
-      title: "Crypto earning tips",
-      content: "Tips for earning crypto safely and securely.",
-      sentiment: "NEUTRAL",
-      source: "FARCASTER",
-      signalTime: faker.date.recent(),
-    },
-    {
-      title: "Bitcoin price prediction",
-      content: "Experts predict Bitcoin will reach new highs this year.",
-      sentiment: "BULLISH",
-      source: "REDDIT",
-      signalTime: faker.date.recent(),
-    },
-    {
-      title: "Ethereum staking guide",
-      content: "Earn rewards by staking your Ethereum.",
-      sentiment: "BULLISH",
-      source: "TWITTER",
-      signalTime: faker.date.recent(),
-    },
-    {
-      title: "Crypto market trends",
-      content: "The crypto market is showing bullish trends in 2025.",
-      sentiment: "BULLISH",
-      source: "YOUTUBE",
-      signalTime: faker.date.recent(),
-    },
-    {
-      title: "Blockchain technology explained",
-      content: "Blockchain is revolutionizing finance and supply chains.",
-      sentiment: "NEUTRAL",
-      source: "TELEGRAM",
-      signalTime: faker.date.recent(),
+      category: ["Market Trends"],
+      subcategory: ["2025", "Bullish"],
     },
     {
       title: "Altcoin earning opportunities",
       content: "Explore new earning opportunities with altcoins.",
-      sentiment: "BULLISH",
-      source: "FARCASTER",
+      sentiment: "BULLISH" as Sentiment,
+      source: "TELEGRAM" as Source,
       signalTime: faker.date.recent(),
+      category: ["Altcoins", "Earning"],
+      subcategory: ["Opportunities"],
     },
-  ].map((post) => ({
-    ...post,
-    sentiment: post.sentiment as Sentiment,
-    source: post.source as Source,
-  }));
+    {
+      title: "Crypto safety tips",
+      content: "Tips for earning crypto safely and securely.",
+      sentiment: "NEUTRAL" as Sentiment,
+      source: "TWITTER" as Source,
+      signalTime: faker.date.recent(),
+      category: ["Safety", "Tips"],
+      subcategory: ["Security"],
+    },
+  ];
   await prisma.post.deleteMany({});
   await prisma.post.createMany({
     data: posts,
   });
 
-  console.log("Seeded crypto-related posts for full-text search testing!");
+  console.log("Seeded 5 crypto-related posts with category and subcategory!");
 }
 
 main()

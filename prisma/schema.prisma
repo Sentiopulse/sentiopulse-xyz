@@ -14,21 +14,21 @@ datasource db {
 }
 
 model User {
-  id               String   @id @default(uuid())
-  email            String   @unique
+  id               String    @id @default(uuid())
+  email            String    @unique
   name             String?
   password         String?
-  role             Role     @default(USER)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  isActive         Boolean  @default(true)
+  role             Role      @default(USER)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  isActive         Boolean   @default(true)
   emailVerified    DateTime?
-  subscriptionType String   @default("free")
+  subscriptionType String    @default("free")
   lastLoginAt      DateTime?
   image            String?
-  
-  accounts         Account[]
-  sessions         Session[]
+
+  accounts Account[]
+  sessions Session[]
 }
 
 model Account {
@@ -76,8 +76,9 @@ enum Sentiment {
   NEUTRAL
   BEARISH
 }
+
 enum Source {
-  REDDIT 
+  REDDIT
   TWITTER
   YOUTUBE
   TELEGRAM
@@ -85,12 +86,14 @@ enum Source {
 }
 
 model Post {
-  id           String    @id @default(uuid())
-  title        String
-  content      String
-  sentiment    Sentiment
-  source       Source
-  signalTime   DateTime
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id          String    @id @default(uuid())
+  title       String
+  content     String
+  sentiment   Sentiment
+  source      Source
+  signalTime  DateTime
+  category    String[]
+  subcategory String[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
