@@ -1,5 +1,6 @@
 "use client";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import PostCard from "../../components/PostComponents/PostCard";
+import SentimentBar from "../../components/PostComponents/SentimentBar";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 
@@ -51,7 +52,7 @@ export default function FetchPost() {
   }, [search]);
 
   return (
-    <div className="container mx-auto py-8 px-4 bg-white">
+    <div className="container mx-auto py-8 px-4 bg-white font-sans">
       <h1 className="text-4xl font-extrabold text-center mb-8 text-black">
         Posts
       </h1>
@@ -64,6 +65,27 @@ export default function FetchPost() {
         />
       </div>
 
+      {/* Sentiment percentage bar */}
+      {!loading &&
+        !error &&
+        info.length > 0 &&
+        (() => {
+          const total = info.length;
+          const bullish = info.filter((p) => p.sentiment === "BULLISH").length;
+          const neutral = info.filter((p) => p.sentiment === "NEUTRAL").length;
+          const bearish = info.filter((p) => p.sentiment === "BEARISH").length;
+          const bullishPct = Math.round((bullish / total) * 100);
+          const neutralPct = Math.round((neutral / total) * 100);
+          const bearishPct = Math.round((bearish / total) * 100);
+          return (
+            <SentimentBar
+              bullishPct={bullishPct}
+              neutralPct={neutralPct}
+              bearishPct={bearishPct}
+            />
+          );
+        })()}
+
       {error && <div className="text-destructive text-center">{error}</div>}
 
       {loading && <div className="text-center">Loading Posts...</div>}
@@ -73,33 +95,9 @@ export default function FetchPost() {
       )}
 
       {!loading && !error && info.length > 0 && (
-        <div className="flex flex-row flex-wrap justify-center gap-4">
+        <div className="flex flex-col gap-4 items-center">
           {info.map((post: PostDTO, index: number) => (
-            <Card
-              key={index}
-              className="bg-black text-white border border-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 w-48"
-            >
-              <CardHeader className="p-2 border-b border-gray-700">
-                <CardTitle className="text-sm font-bold">
-                  {post.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2">
-                <p className="text-xs mb-1">
-                  <strong>Content:</strong> {post.content}
-                </p>
-                <p className="text-xs mb-1">
-                  <strong>Sentiment:</strong> {post.sentiment}
-                </p>
-                <p className="text-xs mb-1">
-                  <strong>Source:</strong> {post.source}
-                </p>
-                <p className="text-xs mb-1">
-                  <strong>Signal Time:</strong>{" "}
-                  {new Date(post.signalTime).toLocaleString()}
-                </p>
-              </CardContent>
-            </Card>
+            <PostCard key={index} post={post} />
           ))}
         </div>
       )}

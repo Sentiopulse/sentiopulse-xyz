@@ -1,0 +1,66 @@
+import React, { useEffect, useState } from "react";
+
+type SentimentBarProps = {
+  bullishPct: number;
+  neutralPct: number;
+  bearishPct: number;
+};
+
+const SentimentBar: React.FC<SentimentBarProps> = ({
+  bullishPct,
+  neutralPct,
+  bearishPct,
+}) => {
+  // Animated count-up for percentages
+  const [bullish, setBullish] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bearish, setBearish] = useState(0);
+
+  useEffect(() => {
+    const duration = 700;
+    const step = 20;
+    const animate = (target: number, setter: (v: number) => void) => {
+      let current = 0;
+      const increment = target / (duration / step);
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          setter(target);
+          clearInterval(timer);
+        } else {
+          setter(Math.round(current));
+        }
+      }, step);
+    };
+    animate(bullishPct, setBullish);
+    animate(neutralPct, setNeutral);
+    animate(bearishPct, setBearish);
+  }, [bullishPct, neutralPct, bearishPct]);
+
+  return (
+    <div className="flex flex-col items-center mb-6">
+      <div className="flex h-6 w-96 rounded overflow-hidden shadow-lg">
+        <div
+          className="flex items-center justify-center bg-green-600 text-green-100 text-xs font-bold transition-all duration-700"
+          style={{ flex: 1 }}
+        >
+          {bullish}%
+        </div>
+        <div
+          className="flex items-center justify-center bg-gray-300 text-gray-600 text-xs font-bold transition-all duration-700"
+          style={{ flex: 1 }}
+        >
+          {neutral}%
+        </div>
+        <div
+          className="flex items-center justify-center bg-orange-600 text-orange-100 text-xs font-bold transition-all duration-700"
+          style={{ flex: 1 }}
+        >
+          {bearish}%
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SentimentBar;

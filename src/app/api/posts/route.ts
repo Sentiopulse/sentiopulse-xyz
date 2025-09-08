@@ -8,6 +8,8 @@ export type PostDTO = {
   sentiment: string;
   source: string;
   signalTime: string;
+  category?: string[];
+  subcategory?: string[];
 };
 
 export async function GET(req: Request) {
@@ -39,6 +41,8 @@ export async function GET(req: Request) {
         source: true,
         signalTime: true,
         sentiment: true,
+        category: true,
+        subcategory: true,
       },
     });
     console.log("Search results:", posts); // Debug search results
