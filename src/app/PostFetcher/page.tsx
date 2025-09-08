@@ -44,6 +44,10 @@ export default function FetchPost() {
         if (search) params.append("search", search);
         if (sortField) params.append("sort", sortField);
         if (sortOrder) params.append("order", sortOrder);
+        if (sentimentFilter && sentimentFilter !== "all")
+          params.append("sentiment", sentimentFilter);
+        if (platformFilter && platformFilter !== "all")
+          params.append("platform", platformFilter);
         const res = await fetch(`/api/posts?${params.toString()}`);
         const data = await res.json();
         console.log("API response:", data); // Debug API response
@@ -136,8 +140,8 @@ export default function FetchPost() {
                   post.sentiment === sentimentFilter) &&
                 (platformFilter === "all" || post.source === platformFilter)
             )
-            .map((post: PostDTO, index: number) => (
-              <PostCard key={index} post={post} />
+            .map((post: PostDTO) => (
+              <PostCard key={post.id} post={post} />
             ))}
         </div>
       )}
