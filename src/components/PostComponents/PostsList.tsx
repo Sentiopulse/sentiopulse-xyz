@@ -5,37 +5,23 @@ import SentimentBar from "./SentimentBar";
 import PostFilters from "./PostFilters";
 import { SortField, SortOrder } from "./PostSortSelect";
 import Spinner from "./Spinner";
+import type { Post } from "@prisma/client";
 
-type PostDTO = {
-  id: string;
-  title: string;
-  content: string | null;
-  sentiment: string;
-  source: string;
-  signalTime: string;
-};
-
-export default function PostBrowser() {
-  const [isMounted, setIsMounted] = useState(false);
+export default function PostsList() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [info, setInfo] = useState<PostDTO[]>([]);
+  const [info, setInfo] = useState<Post[]>([]);
   const [search, setSearch] = useState("");
 
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
   const [sentimentFilter, setSentimentFilter] = useState<string>("all");
-  const [platformFilter, setPlatformFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
   };
-
-  // Avoid rendering Radix Selects until after mount to prevent hydration mismatch
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     const infoFetcher = async () => {
@@ -47,8 +33,8 @@ export default function PostBrowser() {
         if (sortOrder) params.append("order", sortOrder);
         if (sentimentFilter && sentimentFilter !== "all")
           params.append("sentiment", sentimentFilter);
-        if (platformFilter && platformFilter !== "all")
-          params.append("platform", platformFilter);
+        if (sourceFilter && sourceFilter !== "all")
+          params.append("source", sourceFilter);
         const res = await fetch(`/api/posts?${params.toString()}`);
         const data = await res.json();
         if (!res.ok) {
@@ -66,11 +52,11 @@ export default function PostBrowser() {
       }
     };
     infoFetcher();
-  }, [search, sortField, sortOrder, sentimentFilter, platformFilter]);
+  }, [search, sortField, sortOrder, sentimentFilter, sourceFilter]);
 
   return (
     <>
-      {isMounted ? (
+      <div className="mt-8">
         <PostFilters
           search={search}
           onSearchChange={onChangeHandler}
@@ -80,47 +66,21 @@ export default function PostBrowser() {
           onSortOrderChange={setSortOrder}
           sentimentFilter={sentimentFilter}
           onSentimentChange={setSentimentFilter}
-          platformFilter={platformFilter}
-          onPlatformChange={setPlatformFilter}
+          sourceFilter={sourceFilter}
+          onSourceChange={setSourceFilter}
         />
-      ) : (
-        <div className="flex justify-center py-6">
-          <Spinner label="Loading filters" />
-        </div>
-      )}
+      </div>
 
-      {!loading &&
-        !error &&
-        info.length > 0 &&
-        (() => {
-          const filteredInfo = info.filter(
+      {!loading && !error && info.length > 0 && (
+        <SentimentBar
+          info={info.filter(
             (post) =>
               (sentimentFilter === "all" ||
                 post.sentiment === sentimentFilter) &&
-              (platformFilter === "all" || post.source === platformFilter)
-          );
-          const total = filteredInfo.length;
-          if (total === 0) return null;
-          const bullish = filteredInfo.filter(
-            (p) => p.sentiment === "BULLISH"
-          ).length;
-          const neutral = filteredInfo.filter(
-            (p) => p.sentiment === "NEUTRAL"
-          ).length;
-          const bearish = filteredInfo.filter(
-            (p) => p.sentiment === "BEARISH"
-          ).length;
-          const bullishPct = Math.round((bullish / total) * 100);
-          const neutralPct = Math.round((neutral / total) * 100);
-          const bearishPct = Math.round((bearish / total) * 100);
-          return (
-            <SentimentBar
-              bullishPct={bullishPct}
-              neutralPct={neutralPct}
-              bearishPct={bearishPct}
-            />
-          );
-        })()}
+              (sourceFilter === "all" || post.source === sourceFilter)
+          )}
+        />
+      )}
 
       {error && <div className="text-destructive text-center">{error}</div>}
 
@@ -141,9 +101,9 @@ export default function PostBrowser() {
               (post) =>
                 (sentimentFilter === "all" ||
                   post.sentiment === sentimentFilter) &&
-                (platformFilter === "all" || post.source === platformFilter)
+                (sourceFilter === "all" || post.source === sourceFilter)
             )
-            .map((post: PostDTO) => (
+            .map((post: Post) => (
               <PostCard key={post.id} post={post} />
             ))}
         </div>

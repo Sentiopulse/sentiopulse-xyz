@@ -1,16 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-export type PostDTO = {
-  id: string;
-  title: string;
-  content: string;
-  sentiment: string;
-  source: string;
-  signalTime: string;
-  category?: string[];
-  subcategory?: string[];
-};
+import type { Prisma, Sentiment, Source } from "@prisma/client";
 
 export async function GET(req: Request) {
   try {
@@ -18,35 +8,44 @@ export async function GET(req: Request) {
     const search = params.get("search") || undefined;
     const sort = params.get("sort") || "signalTime";
     const order = params.get("order") === "asc" ? "asc" : "desc";
+    const sentiment = params.get("sentiment") || undefined;
+    const platform = params.get("platform") || undefined;
     console.log("Search term received:", search, "Sort:", sort, "Order:", order); // Debug
 
     // Only allow sorting by certain fields
     const allowedSortFields: Record<string, string> = {
       sentiment: "sentiment",
-      createdAt: "signalTime",
+      createdAt: "createdAt",
       platform: "source",
     };
-    const sortField = allowedSortFields[sort] || "signalTime";
+    const sortField = allowedSortFields[sort] || "createdAt";
+
+    const where: Prisma.PostWhereInput = {};
+    if (search) {
+      where.OR = [
+        {
+          title: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          content: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      ];
+    }
+    if (sentiment) {
+      where.sentiment = sentiment as Sentiment;
+    }
+    if (platform) {
+      where.source = platform as Source;
+    }
 
     const posts = await prisma.post.findMany({
-      where: search
-        ? {
-          OR: [
-            {
-              title: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-            {
-              content: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-          ],
-        }
-        : undefined,
+      where: Object.keys(where).length ? where : undefined,
       orderBy: {
         [sortField]: order,
       },
@@ -55,20 +54,16 @@ export async function GET(req: Request) {
         title: true,
         content: true,
         source: true,
-        signalTime: true,
         sentiment: true,
-        category: true,
-        subcategory: true,
+        categories: true,
+        subcategories: true,
+        createdAt: true,
       },
     });
     console.log("Search results:", posts); // Debug search results
-    // Convert signalTime to ISO string
     return NextResponse.json(
       {
-        data: posts.map((post) => ({
-          ...post,
-          signalTime: new Date(post.signalTime).toISOString(),
-        })),
+        data: posts,
       },
       { status: 200 }
     );
