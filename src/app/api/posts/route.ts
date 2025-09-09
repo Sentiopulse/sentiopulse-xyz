@@ -1,15 +1,8 @@
+
+
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-export type PostDTO = {
-  id: string;
-  title: string;
-  content: string | null;
-  sentiment: string;
-  source: string;
-  categories?: string[];
-  subcategories?: string[];
-};
 
 export async function GET(req: Request) {
   try {

@@ -1,28 +1,25 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDistanceToNow } from "date-fns";
+import { getRelativeTime } from "@/lib/date";
 import React from "react";
-import { FaGlobe, FaHashtag, FaReddit, FaTelegram, FaTwitter } from "react-icons/fa";
+import {
+  FaGlobe,
+  FaHashtag,
+  FaReddit,
+  FaTelegram,
+  FaTwitter,
+} from "react-icons/fa";
 import {
   MdSentimentDissatisfied,
   MdSentimentNeutral,
   MdSentimentSatisfied,
 } from "react-icons/md";
 
-type PostDTO = {
-  id: string;
-  title: string;
-  content: string | null;
-  sentiment: string;
-  source: string;
-  createdAt: string;
-  categories?: string[];
-  subcategories?: string[];
-};
+import type { Post } from "@prisma/client";
 
-interface PostCardProps {
-  post: PostDTO;
-}
+type PostCardProps = {
+  post: Post;
+};
 
 const sentimentIcon = (sentiment: string) => {
   if (sentiment === "BULLISH")
@@ -47,7 +44,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => (
       <div className="flex flex-col gap-2">
         {(post.categories?.length || post.subcategories?.length) && (
           <div className="flex gap-2 mb-1 flex-wrap">
-            {(post.categories ?? []).map((cat, idx) => (
+            {(post.categories ?? []).map((cat: string, idx: number) => (
               <span
                 key={`cat-${idx}`}
                 className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold"
@@ -56,7 +53,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => (
                 {cat}
               </span>
             ))}
-            {(post.subcategories ?? []).map((subcat, idx) => (
+            {(post.subcategories ?? []).map((subcat: string, idx: number) => (
               <span
                 key={`subcat-${idx}`}
                 className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold"
@@ -104,8 +101,12 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => (
         </span>
         <span className="flex items-center gap-1 text-xs text-gray-500">
           {/* <FaClock /> Time removed as signalTime is not in schema */}
-          {post.createdAt && !isNaN(Date.parse(post.createdAt))
-            ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
+          {post.createdAt
+            ? getRelativeTime(
+                typeof post.createdAt === "string"
+                  ? post.createdAt
+                  : post.createdAt.toISOString()
+              )
             : "Invalid date"}
         </span>
       </div>

@@ -71,7 +71,7 @@ export default function FetchPost() {
       {!loading && !error && info.length > 0 && (
         <div className="flex flex-col gap-4 items-center">
           {info.map((post) => (
-            <PostCard key={post.id} post={{ ...post, createdAt: post.createdAt instanceof Date ? post.createdAt.toISOString() : post.createdAt }} />
+            <PostCard key={post.id} post={post} />
           ))}
         </div>
       )}
