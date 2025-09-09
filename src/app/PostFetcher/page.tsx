@@ -10,7 +10,9 @@ type PostDTO = {
   content: string | null;
   sentiment: string;
   source: string;
-  signalTime: string;
+  createdAt: string;
+  categories?: string[];
+  subcategories?: string[];
 };
 
 export default function FetchPost() {
@@ -96,8 +98,8 @@ export default function FetchPost() {
 
       {!loading && !error && info.length > 0 && (
         <div className="flex flex-col gap-4 items-center">
-          {info.map((post: PostDTO, index: number) => (
-            <PostCard key={index} post={post} />
+          {info.map((post: PostDTO) => (
+            <PostCard key={post.id} post={post} />
           ))}
         </div>
       )}

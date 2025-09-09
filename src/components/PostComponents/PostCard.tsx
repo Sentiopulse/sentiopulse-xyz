@@ -1,12 +1,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import React from "react";
-import { FaClock, FaHashtag } from "react-icons/fa";
+import { FaHashtag } from "react-icons/fa";
 import {
   MdSentimentSatisfied,
   MdSentimentNeutral,
   MdSentimentDissatisfied,
 } from "react-icons/md";
 import { FaTwitter, FaReddit, FaGlobe } from "react-icons/fa";
+import { formatDistanceToNow } from "date-fns";
 
 type PostDTO = {
   id: string;
@@ -14,23 +15,13 @@ type PostDTO = {
   content: string | null;
   sentiment: string;
   source: string;
-  signalTime: string;
-  category?: string[];
-  subcategory?: string[];
+  createdAt: string;
+  categories?: string[];
+  subcategories?: string[];
 };
 
 interface PostCardProps {
   post: PostDTO;
-}
-
-function getRelativeTime(dateString: string) {
-  const now = new Date();
-  const date = new Date(dateString);
-  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (diff < 60) return `${diff}s ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
 }
 
 const sentimentIcon = (sentiment: string) => {
@@ -53,28 +44,26 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => (
   <Card className="bg-gradient-to-br from-white via-gray-100 to-blue-50 text-black border-none rounded-2xl shadow-xl hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 w-full max-w-4xl px-6 py-4">
     <CardHeader className="p-2">
       <div className="flex flex-col gap-2">
-        {(post.category || post.subcategory) && (
+        {(post.categories?.length || post.subcategories?.length) && (
           <div className="flex gap-2 mb-1 flex-wrap">
-            {post.category &&
-              post.category.map((cat, idx) => (
-                <span
-                  key={`cat-${idx}`}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold"
-                >
-                  <FaHashtag className="mr-1" />
-                  {cat}
-                </span>
-              ))}
-            {post.subcategory &&
-              post.subcategory.map((subcat, idx) => (
-                <span
-                  key={`subcat-${idx}`}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold"
-                >
-                  <FaHashtag className="mr-1" />
-                  {subcat}
-                </span>
-              ))}
+            {post.categories?.map((cat, idx) => (
+              <span
+                key={`cat-${idx}`}
+                className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold"
+              >
+                <FaHashtag className="mr-1" />
+                {cat}
+              </span>
+            ))}
+            {post.subcategories?.map((subcat, idx) => (
+              <span
+                key={`subcat-${idx}`}
+                className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold"
+              >
+                <FaHashtag className="mr-1" />
+                {subcat}
+              </span>
+            ))}
           </div>
         )}
         <CardTitle className="text-2xl font-bold tracking-tight leading-snug">
@@ -113,8 +102,10 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => (
           {post.source}
         </span>
         <span className="flex items-center gap-1 text-xs text-gray-500">
-          <FaClock />
-          {getRelativeTime(post.signalTime)}
+          {/* <FaClock /> Time removed as signalTime is not in schema */}
+          {post.createdAt && !isNaN(Date.parse(post.createdAt))
+            ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
+            : "Invalid date"}
         </span>
       </div>
     </CardContent>

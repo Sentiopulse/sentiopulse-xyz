@@ -44,24 +44,30 @@ const SentimentBar: React.FC<SentimentBarProps> = ({
     };
   }, [bullishPct, neutralPct, bearishPct]);
 
+  // Derived widths from animated values (ensure total = 100%)
+  const clampPct = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
+  const bullW = clampPct(bullish);
+  const neutW = clampPct(neutral);
+  const bearW = Math.max(0, 100 - (bullW + neutW));
+
   return (
     <div className="flex flex-col items-center mb-6">
-      <div className="flex h-6 w-96 rounded overflow-hidden shadow-lg">
+      <div className="flex h-6 w-full max-w-xl rounded overflow-hidden shadow-lg">
         <div
           className="flex items-center justify-center bg-green-600 text-green-100 text-xs font-bold transition-all duration-700"
-          style={{ flex: 1 }}
+          style={{ width: `${bullW}%` }}
         >
           {bullish}%
         </div>
         <div
           className="flex items-center justify-center bg-gray-300 text-gray-600 text-xs font-bold transition-all duration-700"
-          style={{ flex: 1 }}
+          style={{ width: `${neutW}%` }}
         >
           {neutral}%
         </div>
         <div
           className="flex items-center justify-center bg-orange-600 text-orange-100 text-xs font-bold transition-all duration-700"
-          style={{ flex: 1 }}
+          style={{ width: `${bearW}%` }}
         >
           {bearish}%
         </div>
