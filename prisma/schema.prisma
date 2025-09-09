@@ -91,8 +91,11 @@ model Post {
   content       String
   sentiment     Sentiment
   source        Source
-  categories    String[]
-  subcategories String[]
+  categories    String[]  @default([])
+  subcategories String[]  @default([])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([categories], type: Gin)
+  @@index([subcategories], type: Gin)
 }

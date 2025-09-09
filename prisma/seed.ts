@@ -77,10 +77,10 @@ async function main() {
       faker.number.int({ min: 3, max: 5 })
     ),
   }));
-  await prisma.post.deleteMany({});
-  await prisma.post.createMany({
-    data: posts,
-  });
+  await prisma.$transaction([
+    prisma.post.deleteMany({}),
+    prisma.post.createMany({ data: posts }),
+  ]);
 
   console.log("Seeded 10 crypto-related posts with categories and subcategories!");
 }
