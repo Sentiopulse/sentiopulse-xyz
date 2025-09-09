@@ -86,14 +86,13 @@ enum Source {
 }
 
 model Post {
-  id          String    @id @default(uuid())
-  title       String
-  content     String
-  sentiment   Sentiment
-  source      Source
-  signalTime  DateTime
-  category    String[]
-  subcategory String[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String    @id @default(uuid())
+  title         String
+  content       String
+  sentiment     Sentiment
+  source        Source
+  categories    String[]
+  subcategories String[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
