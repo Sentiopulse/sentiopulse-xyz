@@ -1,24 +1,14 @@
 "use client";
+import { Input } from "@/components/ui/input";
+import type { Post } from "@prisma/client";
+import { useEffect, useState } from "react";
 import PostCard from "../../components/PostComponents/PostCard";
 import SentimentBar from "../../components/PostComponents/SentimentBar";
-import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-
-type PostDTO = {
-  id: string;
-  title: string;
-  content: string | null;
-  sentiment: string;
-  source: string;
-  createdAt: string;
-  categories?: string[];
-  subcategories?: string[];
-};
 
 export default function FetchPost() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [info, setInfo] = useState<PostDTO[]>([]);
+  const [info, setInfo] = useState<Post[]>([]);
   const [search, setSearch] = useState("");
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,25 +58,7 @@ export default function FetchPost() {
       </div>
 
       {/* Sentiment percentage bar */}
-      {!loading &&
-        !error &&
-        info.length > 0 &&
-        (() => {
-          const total = info.length;
-          const bullish = info.filter((p) => p.sentiment === "BULLISH").length;
-          const neutral = info.filter((p) => p.sentiment === "NEUTRAL").length;
-          const bearish = info.filter((p) => p.sentiment === "BEARISH").length;
-          const bullishPct = Math.round((bullish / total) * 100);
-          const neutralPct = Math.round((neutral / total) * 100);
-          const bearishPct = Math.round((bearish / total) * 100);
-          return (
-            <SentimentBar
-              bullishPct={bullishPct}
-              neutralPct={neutralPct}
-              bearishPct={bearishPct}
-            />
-          );
-        })()}
+      {!loading && !error && info.length > 0 && <SentimentBar info={info} />}
 
       {error && <div className="text-destructive text-center">{error}</div>}
 
@@ -98,8 +70,8 @@ export default function FetchPost() {
 
       {!loading && !error && info.length > 0 && (
         <div className="flex flex-col gap-4 items-center">
-          {info.map((post: PostDTO) => (
-            <PostCard key={post.id} post={post} />
+          {info.map((post) => (
+            <PostCard key={post.id} post={{ ...post, createdAt: post.createdAt instanceof Date ? post.createdAt.toISOString() : post.createdAt }} />
           ))}
         </div>
       )}
