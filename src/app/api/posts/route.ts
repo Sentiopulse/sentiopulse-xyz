@@ -6,26 +6,42 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
-    const { search } = Object.fromEntries(new URL(req.url).searchParams);
-    console.log("Search term received:", search); // Debug search term
+    const params = new URL(req.url).searchParams;
+    const search = params.get("search") || undefined;
+    const sort = params.get("sort") || "signalTime";
+    const order = params.get("order") === "asc" ? "asc" : "desc";
+    console.log("Search term received:", search, "Sort:", sort, "Order:", order); // Debug
+
+    // Only allow sorting by certain fields
+    const allowedSortFields: Record<string, string> = {
+      sentiment: "sentiment",
+      createdAt: "signalTime",
+      platform: "source",
+    };
+    const sortField = allowedSortFields[sort] || "signalTime";
 
     const posts = await prisma.post.findMany({
-      where: search ? {
-        OR: [
-          {
-            title: {
-              contains: search,
-              mode: "insensitive",
+      where: search
+        ? {
+          OR: [
+            {
+              title: {
+                contains: search,
+                mode: "insensitive",
+              },
             },
-          },
-          {
-            content: {
-              contains: search,
-              mode: "insensitive",
+            {
+              content: {
+                contains: search,
+                mode: "insensitive",
+              },
             },
-          },
-        ],
-      } : undefined,
+          ],
+        }
+        : undefined,
+      orderBy: {
+        [sortField]: order,
+      },
       select: {
         id: true,
         title: true,

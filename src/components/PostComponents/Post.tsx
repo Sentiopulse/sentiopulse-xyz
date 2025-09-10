@@ -1,5 +1,12 @@
 "use client";
-import { Input } from "@/components/ui/input";
+
+import PostFilters from "../../components/PostComponents/PostFilters";
+
+import {
+  SortField,
+  SortOrder,
+} from "../../components/PostComponents/PostSortSelect";
+
 import type { Post } from "@prisma/client";
 import { useEffect, useState } from "react";
 import PostCard from "../../components/PostComponents/PostCard";
@@ -11,6 +18,13 @@ export default function FetchPost() {
   const [info, setInfo] = useState<Post[]>([]);
   const [search, setSearch] = useState("");
 
+  const [sortField, setSortField] = useState<SortField>("createdAt");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+
+  // Filter states
+  const [sentimentFilter, setSentimentFilter] = useState<string>("all");
+  const [platformFilter, setPlatformFilter] = useState<string>("all");
+
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
   };
@@ -20,9 +34,15 @@ export default function FetchPost() {
       setLoading(true);
       try {
         console.log("Search query:", search); // Debug search value
-        const res = await fetch(
-          `/api/posts${search ? `?search=${encodeURIComponent(search)}` : ""}`
-        );
+        const params = new URLSearchParams();
+        if (search) params.append("search", search);
+        if (sortField) params.append("sort", sortField);
+        if (sortOrder) params.append("order", sortOrder);
+        if (sentimentFilter && sentimentFilter !== "all")
+          params.append("sentiment", sentimentFilter);
+        if (platformFilter && platformFilter !== "all")
+          params.append("platform", platformFilter);
+        const res = await fetch(`/api/posts?${params.toString()}`);
         const data = await res.json();
         console.log("API response:", data); // Debug API response
 
@@ -41,21 +61,61 @@ export default function FetchPost() {
       }
     };
     infoFetcher();
-  }, [search]);
+  }, [search, sortField, sortOrder, sentimentFilter, platformFilter]);
 
   return (
     <div className="container mx-auto py-8 px-4 bg-white font-sans">
       <h1 className="text-4xl font-extrabold text-center mb-8 text-black">
         Posts
       </h1>
-      <div className="mb-4 flex justify-center">
-        <Input
-          value={search}
-          onChange={onChangeHandler}
-          placeholder="Search posts..."
-          className="w-full max-w-md"
-        />
-      </div>
+
+      {/* Search and Filters Section */}
+      <PostFilters
+        search={search}
+        onSearchChange={onChangeHandler}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        onSortFieldChange={setSortField}
+        onSortOrderChange={setSortOrder}
+        sentimentFilter={sentimentFilter}
+        onSentimentChange={setSentimentFilter}
+        platformFilter={platformFilter}
+        onPlatformChange={setPlatformFilter}
+      />
+
+      {/* Sentiment percentage bar */}
+      {!loading &&
+        !error &&
+        info.length > 0 &&
+        (() => {
+          const filteredInfo = info.filter(
+            (post) =>
+              (sentimentFilter === "all" ||
+                post.sentiment === sentimentFilter) &&
+              (platformFilter === "all" || post.source === platformFilter)
+          );
+          const total = filteredInfo.length;
+          if (total === 0) return null;
+          const bullish = filteredInfo.filter(
+            (p) => p.sentiment === "BULLISH"
+          ).length;
+          const neutral = filteredInfo.filter(
+            (p) => p.sentiment === "NEUTRAL"
+          ).length;
+          const bearish = filteredInfo.filter(
+            (p) => p.sentiment === "BEARISH"
+          ).length;
+          const bullishPct = Math.round((bullish / total) * 100);
+          const neutralPct = Math.round((neutral / total) * 100);
+          const bearishPct = Math.round((bearish / total) * 100);
+          return (
+            <SentimentBar
+              bullishPct={bullishPct}
+              neutralPct={neutralPct}
+              bearishPct={bearishPct}
+            />
+          );
+        })()}
 
       {/* Sentiment percentage bar */}
       {!loading && !error && info.length > 0 && <SentimentBar info={info} />}
