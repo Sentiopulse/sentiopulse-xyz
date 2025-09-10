@@ -6,19 +6,10 @@ export async function GET(req: Request) {
   try {
     const params = new URL(req.url).searchParams;
     const search = params.get("search") || undefined;
-    const sort = params.get("sort") || "signalTime";
+    const sort = params.get("sort") || "createdAt";
     const order = params.get("order") === "asc" ? "asc" : "desc";
     const sentiment = params.get("sentiment") || undefined;
-    const platform = params.get("platform") || undefined;
-    console.log("Search term received:", search, "Sort:", sort, "Order:", order); // Debug
-
-    // Only allow sorting by certain fields
-    const allowedSortFields: Record<string, string> = {
-      sentiment: "sentiment",
-      createdAt: "createdAt",
-      platform: "source",
-    };
-    const sortField = allowedSortFields[sort] || "createdAt";
+    const source = params.get("source") || undefined;
 
     const where: Prisma.PostWhereInput = {};
     if (search) {
@@ -40,14 +31,14 @@ export async function GET(req: Request) {
     if (sentiment) {
       where.sentiment = sentiment as Sentiment;
     }
-    if (platform) {
-      where.source = platform as Source;
+    if (source) {
+      where.source = source as Source;
     }
 
     const posts = await prisma.post.findMany({
       where: Object.keys(where).length ? where : undefined,
       orderBy: {
-        [sortField]: order,
+        [sort]: order,
       },
       select: {
         id: true,

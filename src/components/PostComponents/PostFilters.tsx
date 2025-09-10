@@ -1,4 +1,7 @@
-import { Select, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectItem,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { PostSortSelect, SortField, SortOrder } from "./PostSortSelect";
 
@@ -62,11 +65,8 @@ export default function PostFilters({
             <label className="text-base font-semibold text-purple-500 mb-2">
               Sentiment
             </label>
-            <Select
-              value={sentimentFilter}
-              onChange={(e) => onSentimentChange(e.target.value)}
-            >
-              <SelectItem value="all">All Sentiments</SelectItem>
+            <Select value={sentimentFilter} onChange={(e) => onSentimentChange(e.target.value)}>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="BULLISH">Bullish</SelectItem>
               <SelectItem value="NEUTRAL">Neutral</SelectItem>
               <SelectItem value="BEARISH">Bearish</SelectItem>
