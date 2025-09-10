@@ -1,16 +1,8 @@
+
+
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-export type PostDTO = {
-  id: string;
-  title: string;
-  content: string;
-  sentiment: string;
-  source: string;
-  signalTime: string;
-  category?: string[];
-  subcategory?: string[];
-};
 
 export async function GET(req: Request) {
   try {
@@ -55,20 +47,16 @@ export async function GET(req: Request) {
         title: true,
         content: true,
         source: true,
-        signalTime: true,
         sentiment: true,
-        category: true,
-        subcategory: true,
+        categories: true,
+        subcategories: true,
+        createdAt: true,
       },
     });
     console.log("Search results:", posts); // Debug search results
-    // Convert signalTime to ISO string
     return NextResponse.json(
       {
-        data: posts.map((post) => ({
-          ...post,
-          signalTime: new Date(post.signalTime).toISOString(),
-        })),
+        data: posts,
       },
       { status: 200 }
     );

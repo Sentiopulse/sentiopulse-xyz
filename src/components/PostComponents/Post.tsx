@@ -1,27 +1,21 @@
 "use client";
-import PostCard from "../../components/PostComponents/PostCard";
-import SentimentBar from "../../components/PostComponents/SentimentBar";
+
 import PostFilters from "../../components/PostComponents/PostFilters";
-import { useEffect, useState } from "react";
 
 import {
   SortField,
   SortOrder,
 } from "../../components/PostComponents/PostSortSelect";
 
-type PostDTO = {
-  id: string;
-  title: string;
-  content: string | null;
-  sentiment: string;
-  source: string;
-  signalTime: string;
-};
+import type { Post } from "@prisma/client";
+import { useEffect, useState } from "react";
+import PostCard from "../../components/PostComponents/PostCard";
+import SentimentBar from "../../components/PostComponents/SentimentBar";
 
 export default function FetchPost() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [info, setInfo] = useState<PostDTO[]>([]);
+  const [info, setInfo] = useState<Post[]>([]);
   const [search, setSearch] = useState("");
 
   const [sortField, setSortField] = useState<SortField>("createdAt");
@@ -123,6 +117,9 @@ export default function FetchPost() {
           );
         })()}
 
+      {/* Sentiment percentage bar */}
+      {!loading && !error && info.length > 0 && <SentimentBar info={info} />}
+
       {error && <div className="text-destructive text-center">{error}</div>}
 
       {loading && <div className="text-center">Loading Posts...</div>}
@@ -133,16 +130,9 @@ export default function FetchPost() {
 
       {!loading && !error && info.length > 0 && (
         <div className="flex flex-col gap-4 items-center">
-          {info
-            .filter(
-              (post) =>
-                (sentimentFilter === "all" ||
-                  post.sentiment === sentimentFilter) &&
-                (platformFilter === "all" || post.source === platformFilter)
-            )
-            .map((post: PostDTO) => (
-              <PostCard key={post.id} post={post} />
-            ))}
+          {info.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
         </div>
       )}
     </div>
