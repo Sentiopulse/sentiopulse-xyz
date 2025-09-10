@@ -8,9 +8,9 @@ import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { mainnet, polygon, optimism, arbitrum, base } from "wagmi/chains";
 
 const config = getDefaultConfig({
-  appName: "SentioPulse",
+  appName: process.env.NEXT_PUBLIC_WALLETCONNECT_APP_NAME || "SentioPulse",
   chains: [mainnet, polygon, optimism, arbitrum, base],
-  projectId: "YOUR_PROJECT_ID", // Replace with your WalletConnect Project ID
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "", // Set in .env.local
   ssr: true, // If your dApp uses server side rendering (SSR)
 });
 
