@@ -1,9 +1,6 @@
 import {
   Select,
-  SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { PostSortSelect, SortField, SortOrder } from "./PostSortSelect";
@@ -17,8 +14,8 @@ interface PostFiltersProps {
   onSortOrderChange: (order: SortOrder) => void;
   sentimentFilter: string;
   onSentimentChange: (value: string) => void;
-  platformFilter: string;
-  onPlatformChange: (value: string) => void;
+  sourceFilter: string;
+  onSourceChange: (value: string) => void;
 }
 
 export default function PostFilters({
@@ -30,8 +27,8 @@ export default function PostFilters({
   onSortOrderChange,
   sentimentFilter,
   onSentimentChange,
-  platformFilter,
-  onPlatformChange,
+  sourceFilter,
+  onSourceChange,
 }: PostFiltersProps) {
   return (
     <div className="mb-8 space-y-6">
@@ -68,61 +65,28 @@ export default function PostFilters({
             <label className="text-base font-semibold text-purple-500 mb-2">
               Sentiment
             </label>
-            <Select value={sentimentFilter} onValueChange={onSentimentChange}>
-              <SelectTrigger className="h-11 px-4 border border-gray-300 rounded-lg shadow-sm bg-gray-50 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition flex items-center">
-                <span className="mr-2 text-blue-500">
-                  <svg
-                    width="18"
-                    height="18"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                    <path d="M9 9h.01" />
-                    <path d="M15 9h.01" />
-                  </svg>
-                </span>
-                <SelectValue placeholder="All sentiments" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="BULLISH">Bullish</SelectItem>
-                <SelectItem value="NEUTRAL">Neutral</SelectItem>
-                <SelectItem value="BEARISH">Bearish</SelectItem>
-              </SelectContent>
+            <Select value={sentimentFilter} onChange={(e) => onSentimentChange(e.target.value)}>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="BULLISH">Bullish</SelectItem>
+              <SelectItem value="NEUTRAL">Neutral</SelectItem>
+              <SelectItem value="BEARISH">Bearish</SelectItem>
             </Select>
           </div>
 
           <div className="flex flex-col min-w-[170px]">
             <label className="text-base font-semibold text-purple-500 mb-2">
-              Platform
+              Source
             </label>
-            <Select value={platformFilter} onValueChange={onPlatformChange}>
-              <SelectTrigger className="h-11 px-4 border border-gray-300 rounded-lg shadow-sm bg-gray-50 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition flex items-center">
-                <span className="mr-2 text-green-500">
-                  <svg
-                    width="18"
-                    height="18"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <rect x="3" y="7" width="18" height="10" rx="2" />
-                    <path d="M8 11h.01" />
-                    <path d="M16 11h.01" />
-                  </svg>
-                </span>
-                <SelectValue placeholder="All platforms" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="TELEGRAM">Telegram</SelectItem>
-                <SelectItem value="TWITTER">Twitter</SelectItem>
-              </SelectContent>
+            <Select
+              value={sourceFilter}
+              onChange={(e) => onSourceChange(e.target.value)}
+            >
+              <SelectItem value="all">All Sources</SelectItem>
+              <SelectItem value="REDDIT">Reddit</SelectItem>
+              <SelectItem value="TWITTER">Twitter</SelectItem>
+              <SelectItem value="YOUTUBE">YouTube</SelectItem>
+              <SelectItem value="TELEGRAM">Telegram</SelectItem>
+              <SelectItem value="FARCASTER">Farcaster</SelectItem>
             </Select>
           </div>
         </div>

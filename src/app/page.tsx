@@ -1,8 +1,5 @@
-import FetchPost from "@/components/PostComponents/Post";
+import PostsList from "@/components/PostComponents/PostsList";
 
-
-export default function HomePage(){
-  return(
-    <FetchPost/>
-  )
+export default function HomePage() {
+  return <PostsList />;
 }

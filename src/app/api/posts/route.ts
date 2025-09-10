@@ -1,46 +1,44 @@
-
-
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { Prisma, Sentiment, Source } from "@prisma/client";
 
 export async function GET(req: Request) {
   try {
     const params = new URL(req.url).searchParams;
     const search = params.get("search") || undefined;
-    const sort = params.get("sort") || "signalTime";
+    const sort = params.get("sort") || "createdAt";
     const order = params.get("order") === "asc" ? "asc" : "desc";
-    console.log("Search term received:", search, "Sort:", sort, "Order:", order); // Debug
+    const sentiment = params.get("sentiment") || undefined;
+    const source = params.get("source") || undefined;
 
-    // Only allow sorting by certain fields
-    const allowedSortFields: Record<string, string> = {
-      sentiment: "sentiment",
-      createdAt: "signalTime",
-      platform: "source",
-    };
-    const sortField = allowedSortFields[sort] || "signalTime";
+    const where: Prisma.PostWhereInput = {};
+    if (search) {
+      where.OR = [
+        {
+          title: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          content: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      ];
+    }
+    if (sentiment) {
+      where.sentiment = sentiment as Sentiment;
+    }
+    if (source) {
+      where.source = source as Source;
+    }
 
     const posts = await prisma.post.findMany({
-      where: search
-        ? {
-          OR: [
-            {
-              title: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-            {
-              content: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-          ],
-        }
-        : undefined,
+      where: Object.keys(where).length ? where : undefined,
       orderBy: {
-        [sortField]: order,
+        [sort]: order,
       },
       select: {
         id: true,
