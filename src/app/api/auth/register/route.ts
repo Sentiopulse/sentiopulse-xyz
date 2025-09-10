@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createUser, getUserByEmail } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   try {
     const { name, email, password } = await request.json();
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
     // Validate input
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
         { status: 400 }
@@ -21,16 +23,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await getUserByEmail(email);
+    const existingUser = await getUserByEmail(normalizedEmail);
     if (existingUser) {
       return NextResponse.json(
         { error: "User with this email already exists" },
-        { status: 400 }
+        { status: 409 }
       );
     }
 
     // Create new user
-    const user = await createUser(email, password, name);
+    const user = await createUser(normalizedEmail, password, name);
 
     return NextResponse.json(
       {
@@ -44,6 +46,18 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002" &&
+      (Array.isArray(error.meta?.target)
+        ? (error.meta!.target as string[]).includes("email")
+        : `${error.meta?.target ?? ""}`.includes("email"))
+    ) {
+      return NextResponse.json(
+        { error: "User with this email already exists" },
+        { status: 409 }
+      );
+    }
     console.error("Registration error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
