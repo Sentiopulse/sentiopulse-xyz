@@ -26,14 +26,6 @@ export async function POST(request: NextRequest) {
     const normalizedEmail = email;
 
     // Check if user already exists
-    const existingUser = await getUserByEmail(normalizedEmail);
-    if (existingUser) {
-      console.error("Duplicate email registration attempt", { email: normalizedEmail });
-      return NextResponse.json(
-        { error: "Something went wrong. Please try again." },
-        { status: 409 }
-      );
-    }
 
     // Create new user
     const user = await createUser(normalizedEmail, password, name);
