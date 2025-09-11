@@ -10,6 +10,8 @@ export async function GET(req: Request) {
     const order = params.get("order") === "asc" ? "asc" : "desc";
     const sentiment = params.get("sentiment") || undefined;
     const source = params.get("source") || undefined;
+    const cursor = params.get("cursor") || undefined;
+    const limit = parseInt(params.get("limit") || "2");
 
     const where: Prisma.PostWhereInput = {};
     if (search) {
@@ -36,6 +38,9 @@ export async function GET(req: Request) {
     }
 
     const posts = await prisma.post.findMany({
+      take: limit,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { id: cursor } : undefined,
       where: Object.keys(where).length ? where : undefined,
       orderBy: {
         [sort]: order,
@@ -52,9 +57,15 @@ export async function GET(req: Request) {
       },
     });
     console.log("Search results:", posts); // Debug search results
+
+    // Get the next cursor (ID of the last post)
+    const nextCursor = posts.length > 0 ? posts[posts.length - 1].id : null;
+
     return NextResponse.json(
       {
         data: posts,
+        nextCursor,
+        hasMore: posts.length === limit,
       },
       { status: 200 }
     );
