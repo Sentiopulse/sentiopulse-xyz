@@ -10,6 +10,7 @@ import type { Post } from "@prisma/client";
 export default function PostsList() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [info, setInfo] = useState<Post[]>([]);
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("createdAt");
@@ -28,7 +29,11 @@ export default function PostsList() {
   // Fetch posts (initial and paginated)
   const fetchPosts = useCallback(
     async (cursor?: string, reset = false) => {
-      setLoading(true);
+      if (cursor) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
       try {
         const params = new URLSearchParams();
         if (search) params.append("search", search);
@@ -38,7 +43,7 @@ export default function PostsList() {
           params.append("sentiment", sentimentFilter);
         if (sourceFilter && sourceFilter !== "all")
           params.append("source", sourceFilter);
-        params.append("limit", "10");
+        params.append("limit", "2");
         if (cursor) params.append("cursor", cursor);
         const res = await fetch(`/api/posts?${params.toString()}`);
         const data = await res.json();
@@ -57,7 +62,11 @@ export default function PostsList() {
         setInfo([]);
         setHasMore(false);
       } finally {
-        setLoading(false);
+        if (cursor) {
+          setLoadingMore(false);
+        } else {
+          setLoading(false);
+        }
       }
     },
     [search, sortField, sortOrder, sentimentFilter, sourceFilter]
@@ -141,7 +150,7 @@ export default function PostsList() {
           {/* Infinite scroll trigger */}
           {hasMore && (
             <div ref={loadMoreRef} className="py-4">
-              {loading ? (
+              {loadingMore ? (
                 <Spinner label="Loading more posts" />
               ) : (
                 <span>Loading more...</span>

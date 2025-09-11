@@ -11,7 +11,8 @@ export async function GET(req: Request) {
     const sentiment = params.get("sentiment") || undefined;
     const source = params.get("source") || undefined;
     const cursor = params.get("cursor") || undefined;
-    const limit = parseInt(params.get("limit") || "2");
+    const limitParam = parseInt(params.get("limit") || "10");
+    const limit = Math.min(Math.max(limitParam || 10, 1), 100); // Clamp between 1 and 100
 
     const where: Prisma.PostWhereInput = {};
     if (search) {
