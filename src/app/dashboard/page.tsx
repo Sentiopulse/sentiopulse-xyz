@@ -1,7 +1,5 @@
 "use client";
 
-// import { useSession } from "next-auth/react";
-
 export default function DashboardPage() {
   // Temporarily disable authentication until new auth system is implemented
   // const { data: session, status } = useSession();

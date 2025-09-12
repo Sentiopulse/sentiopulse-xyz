@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-// import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Card,
@@ -21,7 +19,6 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   // Temporarily disable login functionality until new auth system is implemented
   const handleSubmit = (e: React.FormEvent) => {

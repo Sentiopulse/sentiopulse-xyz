@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import type { Post, Sentiment } from "@prisma/client";
+import type { Post} from "@prisma/client";
 
 type SentimentBarProps = {
   info: Post[];
