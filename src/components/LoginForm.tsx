@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import WalletConnectButton from "./walletconnectbutton";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -42,7 +43,7 @@ export default function LoginForm() {
             <div className="flex flex-col justify-center space-y-3">
               <GoogleSignInButton />
               <div className="flex justify-center">
-                <ConnectButton />
+                <WalletConnectButton/>
               </div>
             </div>
             <div className="relative">
