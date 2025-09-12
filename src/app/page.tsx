@@ -1,5 +1,4 @@
 import PostsList from "@/components/PostComponents/PostsList";
-// import AuthStatus from "@/components/AuthStatus";
 
 export default function HomePage() {
   return (
