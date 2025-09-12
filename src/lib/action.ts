@@ -4,34 +4,63 @@ import { prisma } from "./prisma";
 
 export async function addUser(address: string, email?: string) {
 
-    if (!address && !email) {
+    const normalizedAddress = address ? address.trim().toLowerCase() : undefined;
+    if (!normalizedAddress && !email) {
         throw new Error("Must provide wallet address or email");
     }
 
-    let user;
-    if(address){
-        user = await prisma.user.findUnique({
-            where: {
-                walletAddress: address
-            }
-        })
-    };
+    const selectSafe = {
+        id: true,
+        email: true,
+        walletAddress: true,
+        role: true,
+        name: true,
+        image: true,
+        subscriptionType: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLoginAt: true,
+        isActive: true,
+    } as const;
 
-    if(!user && email) {
-        user = await prisma.user.findUnique({
-            where:{
-                email: email
+    // Prefer wallet path when available (idempotent via upsert)
+    if (normalizedAddress) {
+        try {
+            const user = await prisma.user.upsert({
+                where: { walletAddress: normalizedAddress },
+                update: { lastLoginAt: new Date() },
+                create: {
+                    walletAddress: normalizedAddress,
+                    email: email ?? null,
+                    lastLoginAt: new Date(),
+                },
+                select: selectSafe,
+            });
+            // Optionally link email if provided and not set yet
+            if (email && !user.email) {
+                return await prisma.user.update({
+                    where: { id: user.id },
+                    data: { email },
+                    select: selectSafe,
+                });
             }
-        })
+            return user;
+        } catch (e) {
+            // Handle race: if unique constraint hit, re-fetch
+            const existing = await prisma.user.findUnique({
+                where: { walletAddress: normalizedAddress },
+                select: selectSafe,
+            });
+            if (existing) return existing;
+            throw e;
+        }
     }
 
-    if (!user) {
-        user = await prisma.user.create({
-            data: {
-                walletAddress: address,
-                email:email
-            }
-        })
-    }
-    return user;
+    // Email-only path (idempotent)
+    return prisma.user.upsert({
+        where: { email: email as string },
+        update: { lastLoginAt: new Date() },
+        create: { email: email as string },
+        select: selectSafe,
+    });
 }
