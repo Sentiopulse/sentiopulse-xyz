@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+// import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -61,21 +61,10 @@ export default function RegisterForm() {
         throw new Error(data.error || "Registration failed");
       }
 
-      // Auto sign in after successful registration
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError(
-          "Registration successful, but sign in failed. Please try signing in manually."
-        );
-      } else {
-        router.push("/");
-        router.refresh();
-      }
+      // Temporarily disable auto-login until new auth system is implemented
+      setError(
+        "Registration successful. Please sign in manually once authentication is available."
+      );
     } catch (error) {
       setError(
         error instanceof Error
@@ -100,7 +89,7 @@ export default function RegisterForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex flex-col justify-center space-y-3">
+            <div className="flex flex-col justify-center space-y-3">
               <GoogleSignInButton />
               <div className="flex justify-center">
                 <ConnectButton />
