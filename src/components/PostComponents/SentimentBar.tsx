@@ -1,22 +1,25 @@
 import React, { useEffect, useState } from "react";
+import type { Post, Sentiment } from "@prisma/client";
 
 type SentimentBarProps = {
-  bullishPct: number;
-  neutralPct: number;
-  bearishPct: number;
+  info: Post[];
 };
 
-const SentimentBar: React.FC<SentimentBarProps> = ({
-  bullishPct,
-  neutralPct,
-  bearishPct,
-}) => {
-  // Animated count-up for percentages
+const SentimentBar: React.FC<SentimentBarProps> = ({ info }) => {
   const [bullish, setBullish] = useState(0);
   const [neutral, setNeutral] = useState(0);
   const [bearish, setBearish] = useState(0);
 
   useEffect(() => {
+    const total = info.length;
+    const bullishCount = info.filter((p) => p.sentiment === "BULLISH").length;
+    const neutralCount = info.filter((p) => p.sentiment === "NEUTRAL").length;
+    const bearishCount = info.filter((p) => p.sentiment === "BEARISH").length;
+    const bullishPct = total ? (bullishCount / total) * 100 : 0;
+    const neutralPct = total ? (neutralCount / total) * 100 : 0;
+    const bearishPct = total ? (bearishCount / total) * 100 : 0;
+
+    // Animated count-up for percentages
     const duration = 700;
     const step = 20;
     const timers: number[] = [];
@@ -42,7 +45,7 @@ const SentimentBar: React.FC<SentimentBarProps> = ({
     return () => {
       timers.forEach(window.clearInterval);
     };
-  }, [bullishPct, neutralPct, bearishPct]);
+  }, [info]);
 
   return (
     <div className="flex flex-col items-center mb-6">

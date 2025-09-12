@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import PostCard from "./PostCard";
 import SentimentBar from "./SentimentBar";
 import PostFilters from "./PostFilters";
@@ -10,22 +10,30 @@ import type { Post } from "@prisma/client";
 export default function PostsList() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [info, setInfo] = useState<Post[]>([]);
   const [search, setSearch] = useState("");
-
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-
   const [sentimentFilter, setSentimentFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
   };
 
-  useEffect(() => {
-    const infoFetcher = async () => {
-      setLoading(true);
+  // Fetch posts (initial and paginated)
+  const fetchPosts = useCallback(
+    async (cursor?: string, reset = false) => {
+      if (cursor) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
       try {
         const params = new URLSearchParams();
         if (search) params.append("search", search);
@@ -35,24 +43,57 @@ export default function PostsList() {
           params.append("sentiment", sentimentFilter);
         if (sourceFilter && sourceFilter !== "all")
           params.append("source", sourceFilter);
+        params.append("limit", "2");
+        if (cursor) params.append("cursor", cursor);
         const res = await fetch(`/api/posts?${params.toString()}`);
         const data = await res.json();
         if (!res.ok) {
           setError(data.error);
           setInfo([]);
+          setHasMore(false);
         } else {
           setError(null);
-          setInfo(data.data);
+          setHasMore(data.hasMore);
+          setNextCursor(data.nextCursor);
+          setInfo((prev) => (reset ? data.data : [...prev, ...data.data]));
         }
       } catch {
         setError("An error occurred while fetching posts.");
         setInfo([]);
+        setHasMore(false);
       } finally {
-        setLoading(false);
+        if (cursor) {
+          setLoadingMore(false);
+        } else {
+          setLoading(false);
+        }
       }
-    };
-    infoFetcher();
-  }, [search, sortField, sortOrder, sentimentFilter, sourceFilter]);
+    },
+    [search, sortField, sortOrder, sentimentFilter, sourceFilter]
+  );
+
+  // Initial fetch or filter change
+  useEffect(() => {
+    setInfo([]);
+    setNextCursor(null);
+    setHasMore(true);
+    fetchPosts(undefined, true);
+  }, [search, sortField, sortOrder, sentimentFilter, sourceFilter, fetchPosts]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!hasMore || loading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new window.IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore && !loading && nextCursor) {
+        fetchPosts(nextCursor);
+      }
+    });
+    if (loadMoreRef.current) {
+      observer.current.observe(loadMoreRef.current);
+    }
+    return () => observer.current?.disconnect();
+  }, [hasMore, loading, nextCursor, fetchPosts]);
 
   return (
     <>
@@ -106,6 +147,16 @@ export default function PostsList() {
             .map((post: Post) => (
               <PostCard key={post.id} post={post} />
             ))}
+          {/* Infinite scroll trigger */}
+          {hasMore && (
+            <div ref={loadMoreRef} className="py-4">
+              {loadingMore ? (
+                <Spinner label="Loading more posts" />
+              ) : (
+                <span>Loading more...</span>
+              )}
+            </div>
+          )}
         </div>
       )}
     </>
